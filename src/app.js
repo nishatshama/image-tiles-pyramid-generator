@@ -16,7 +16,7 @@ function generatePyramidTiles(filename){
 			for (let levelDepth = Math.ceil(Math.log2(Math.max(metadata.height, metadata.width))); levelDepth >= 0; levelDepth--) {
 				fs.existsSync(`output_images/${levelDepth}`) || fs.mkdirSync(`output_images/${levelDepth}`);
 
-				console.log('levelDepth, imageheight, imagewidth', levelDepth, imgHeight, imgWidth);
+				console.log(`Constructing tiles for level ${levelDepth} for the ${imgWidth}x${imgHeight}`);
 				let edgeTileX = imgWidth % 256;
 				let edgeTileY = imgHeight % 256;
 				if(imgHeight > 256 && imgWidth > 256) {
