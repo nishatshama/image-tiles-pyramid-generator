@@ -5,7 +5,8 @@
 	"main": "app.js",
 	"scripts": {
 		"test": "jest --watch",
-		"start": "node src/app.js"
+		"start": "node src/app.js",
+		"additional-test": "node src/patch_images.js"
 	},
 	"repository": {
 		"type": "git",
