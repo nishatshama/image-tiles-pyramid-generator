@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 
 const sharp = require('sharp');
 
@@ -14,6 +15,9 @@ function generatePyramidTiles(filename){
 			throw err;
 		}
 	}
+	
+	const fileBasename = path.basename(filename);
+	fs.existsSync(path.join('output_images', fileBasename)) || fs.mkdirSync(path.join('output_images', fileBasename));
 	const targetImage = sharp(img);
 
 	targetImage.metadata()
@@ -23,13 +27,14 @@ function generatePyramidTiles(filename){
 			let currentImage = targetImage;
 
 			for (let levelDepth = Math.ceil(Math.log2(Math.max(metadata.height, metadata.width))); levelDepth >= 0; levelDepth--) {
-				fs.existsSync(`output_images/${levelDepth}`) || fs.mkdirSync(`output_images/${levelDepth}`);
+				fs.existsSync(path.join('output_images', fileBasename, levelDepth.toString())) || fs.mkdirSync(path.join('output_images', fileBasename, levelDepth.toString()));
 
 				console.log(`Constructing tiles for level ${levelDepth} for the ${imgWidth}x${imgHeight}`);
 				let edgeTileX = imgWidth % 256;
 				let edgeTileY = imgHeight % 256;
 				if(imgHeight > 256 && imgWidth > 256) {
 					generateTilesFrom2D(
+						fileBasename,
 						currentImage,
 						levelDepth,
 						imgSizeOuter=imgHeight,
@@ -39,6 +44,7 @@ function generatePyramidTiles(filename){
 					);
 				} else if(imgHeight > 256){
 					generateTilesFrom1D(
+						fileBasename,
 						currentImage,
 						levelDepth,
 						imgSizeInner=imgHeight,
@@ -49,6 +55,7 @@ function generatePyramidTiles(filename){
 					);
 				} else if(imgWidth > 256){
 					generateTilesFrom1D(
+						fileBasename,
 						currentImage,
 						levelDepth,
 						imgSizeInner=imgWidth,
@@ -58,7 +65,7 @@ function generatePyramidTiles(filename){
 						true
 					);
 				} else {
-					currentImage.toFile(`output_images/${levelDepth}/0_0.jpg`);
+					currentImage.toFile(path.join('output_images', fileBasename, levelDepth.toString(), '0_0.jpg'));
 				}
 
 				imgHeight = Math.ceil(imgHeight / 2);
@@ -68,14 +75,14 @@ function generatePyramidTiles(filename){
 		})
 }
 
-function generateTilesFrom2D(currentImage, levelDepth, imgSizeOuter, imgSizeInner, edgeTileSizeOuter, edgeTileSizeInner){
+function generateTilesFrom2D(filename, currentImage, levelDepth, imgSizeOuter, imgSizeInner, edgeTileSizeOuter, edgeTileSizeInner){
 	for(let tileCountOuter = 0; tileCountOuter < imgSizeOuter ; tileCountOuter += 256){
 		let tileSizeOuter = edgeTileSizeOuter > 0 && tileCountOuter + 256 > imgSizeOuter ? edgeTileSizeOuter : 256;
-		generateTilesFrom1D(currentImage, levelDepth, imgSizeInner, edgeTileSizeInner, tileSizeOuter, tileCountOuter, true);
+		generateTilesFrom1D(filename, currentImage, levelDepth, imgSizeInner, edgeTileSizeInner, tileSizeOuter, tileCountOuter, true);
 	}
 }
 
-function generateTilesFrom1D(currentImage, levelDepth, imgSizeInner, edgeTileSizeInner, tileSizeOuter, tileCountOuter, isCroppingByXAxis){
+function generateTilesFrom1D(filename, currentImage, levelDepth, imgSizeInner, edgeTileSizeInner, tileSizeOuter, tileCountOuter, isCroppingByXAxis){
 	for(let tileCountInner = 0; tileCountInner < imgSizeInner; tileCountInner += 256){
 		let tileSizeInner = edgeTileSizeInner > 0 && tileCountInner + 256 > imgSizeInner ? edgeTileSizeInner : 256;
 		currentImage
@@ -85,7 +92,7 @@ function generateTilesFrom1D(currentImage, levelDepth, imgSizeInner, edgeTileSiz
 						top: isCroppingByXAxis ? tileCountOuter : tileCountInner,
 						left: isCroppingByXAxis ? tileCountInner : tileCountOuter
 			})
-			.toFile(`output_images/${levelDepth}/${tileCountInner}_${tileCountOuter}.jpg`);
+			.toFile(path.join('output_images', filename, levelDepth.toString(), `${tileCountInner}_${tileCountOuter}.jpg`));
 	}
 }
 
