@@ -96,4 +96,8 @@ function generateTilesFrom1D(filename, currentImage, levelDepth, imgSizeInner, e
 	}
 }
 
-generatePyramidTiles('Cat 1.jpg');
+if (typeof module !== 'undefined' && !module.parent) {
+	process.argv.slice(2).forEach(arg => {
+		generatePyramidTiles(arg);
+	});
+}
