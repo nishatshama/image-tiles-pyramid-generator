@@ -4,8 +4,19 @@ const sharp = require('sharp');
 
 function generatePyramidTiles(filename){
 	fs.existsSync('output_images') || fs.mkdirSync('output_images');
-
-	const targetImage = sharp(filename);
+	
+	let img = null;
+	try{
+		img = fs.readFileSync(filename);
+	} catch (err) {
+		if(err.code === 'ENOENT'){
+			console.log(`${filename} not found! Please provide a valid image`);
+			return;
+		} else {
+			throw err;
+		}
+	}
+	const targetImage = sharp(img);
 	
 	targetImage.metadata()
 		.then(metadata => {
